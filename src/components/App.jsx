@@ -12,6 +12,8 @@ import api from "../api/contact"
 
 function App() {
   const [contacts, setContacts] = useState([])
+  const [searchTerm, setSearchTerm] = useState("")
+  const [searchResult, setSearchResult] = useState([])
 
   const retriveContacts = async () => {
     const response = await api.get('/contacts')
@@ -26,15 +28,15 @@ function App() {
     const response = await api.post('/contacts', request)
     // console.log(response.data)
     setContacts([...contacts, response.data])
-  };
+  }
 
   const removeContactHandler = async (id) => {
-    await api.delete(`/contacts/${ id }`);
+    await api.delete(`/contacts/${ id }`)
     const newContactList = contacts.filter((contact) => {
       return contact.id !== id
-    });
+    })
     setContacts(newContactList)
-  };
+  }
 
   const updateContactHandler = async (contact) => {
     const response = await api.patch(`/contacts/${ contact.id }`, contact)
@@ -42,9 +44,23 @@ function App() {
     const { id, name, email } = response.data
     setContacts(contacts.map((contact) => {
       return contact.id === id ? { ...response.data } : contact
-    }));
-  };
+    }))
+  }
 
+  const searchHandler = (searchTerm) => {
+    // console.log(searchTerm);
+    setSearchTerm(searchTerm)
+    if (searchTerm !== "") {
+      const newContactList = contacts.filter((contact) => {
+        return Object.values(contact).join(" ").toLowerCase().includes(searchTerm.toLowerCase())
+      })
+      // console.log(newContactList);
+      setSearchResult(newContactList)
+    }
+    else {
+      setSearchResult(contacts)
+    }
+  }
 
   useEffect(() => {
     const getAllContacts = async () => {
@@ -61,7 +77,7 @@ function App() {
         <Header />
         <Routes>
 
-          <Route index element={<ContactList contacts={contacts} />}></Route>
+          <Route index element={<ContactList contacts={ searchTerm.length <1 ? contacts : searchResult} term={searchTerm} searchKeyword={searchHandler} />}></Route>
           <Route path='add-contact' element={<AddContact addContactHandler={addContactHandler} />}></Route>
           <Route path="delete-contact/:id" element={<DeleteContact deleteContactHandler={removeContactHandler} />}></Route>
           <Route path="edit-contact/:id" element={<EditContact editContactHandler={updateContactHandler} contacts={contacts} />}></Route>

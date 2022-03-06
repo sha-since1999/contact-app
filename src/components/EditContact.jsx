@@ -6,7 +6,7 @@ const EditContact =(props) => {
     let param = useParams();
     const id = param.id;
     const changableContact=  props.contacts.find( (contact) => contact.id === id);
-    console.log(changableContact);
+    // console.log(changableContact);
     const [contact, setContact] = useState(changableContact);
 
     
