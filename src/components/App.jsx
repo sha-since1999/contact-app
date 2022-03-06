@@ -1,60 +1,77 @@
-import React,{ useState, useEffect } from "react";
-import { BrowserRouter  as Router ,  Routes , Route }  from 'react-router-dom' ;
-import "./App.css";
+import React, { useState, useEffect } from "react"
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import "./App.css"
 import { v4 as uuid } from "uuid"
-import ContactList from "./ContactList";
-import AddContact from "./AddContact";
-import Header from "./Header"; 
-import ContactDetail from "./ContactDetail";
+import ContactList from "./ContactList"
+import AddContact from "./AddContact"
+import Header from "./Header"
+import ContactDetail from "./ContactDetail"
 import DeleteContact from "./DeleteContact"
+import EditContact from "./EditContact"
+import api from "../api/contact"
 
 function App() {
-  const LOCAL_STORAGE_KEY = "contacts"
-const [contacts, setContacts] = useState([]);
+  const [contacts, setContacts] = useState([])
 
-const addContactHandler = (contact) => {
-  // console.log(contact);
-  // console.log(uuid())
-  setContacts([...contacts, { id :uuid(), ...contact} ]);
-};
-
-const removeContactHandler = (id ) => {
-  const newContactList= contacts.filter((contact) =>{
-    return contact.id !== id ;
-  });
-  setContacts(newContactList);
-};
-
-useEffect(() => {
-  const retriveContacts= JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
-  if( retriveContacts) {
-    setContacts(retriveContacts);
+  const retriveContacts = async () => {
+    const response = await api.get('/contacts')
+    return response.data
   }
-}, []);
-
-useEffect( () => {
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(contacts))
-},[contacts]);
 
 
+  const addContactHandler = async (contact) => {
+    // console.log(contact);
+    // console.log(uuid())
+    const request = { id: uuid(), ...contact, }
+    const response = await api.post('/contacts', request)
+    // console.log(response.data)
+    setContacts([...contacts, response.data])
+  };
+
+  const removeContactHandler = async (id) => {
+    await api.delete(`/contacts/${ id }`);
+    const newContactList = contacts.filter((contact) => {
+      return contact.id !== id
+    });
+    setContacts(newContactList)
+  };
+
+  const updateContactHandler = async (contact) => {
+    const response = await api.patch(`/contacts/${ contact.id }`, contact)
+    //  console.log(response.data);
+    const { id, name, email } = response.data
+    setContacts(contacts.map((contact) => {
+      return contact.id === id ? { ...response.data } : contact
+    }));
+  };
+
+
+  useEffect(() => {
+    const getAllContacts = async () => {
+      const allcontacts = await retriveContacts()
+      if (allcontacts) setContacts(allcontacts)
+    }
+    getAllContacts()
+  }, [])
 
 
   return (
     <div className="ui container" >
       <Router>
-        <Header/>
-          <Routes>
+        <Header />
+        <Routes>
 
-            <Route  index  element= {<ContactList contacts ={contacts} />}></Route>
-            <Route   path='add-contact'   element= {<AddContact addContactHandler = {addContactHandler} /> }></Route>
-            <Route   path='contact/:id'   element ={ <ContactDetail contacts= {contacts} /> }></Route>
-            <Route path="delete-contact/:id" element = {<DeleteContact deleteContactHandler= {removeContactHandler} />}></Route>
-            <Route   path='*'   element= {<h1> page not found! </h1>}></Route>
-         
-          </Routes>
+          <Route index element={<ContactList contacts={contacts} />}></Route>
+          <Route path='add-contact' element={<AddContact addContactHandler={addContactHandler} />}></Route>
+          <Route path="delete-contact/:id" element={<DeleteContact deleteContactHandler={removeContactHandler} />}></Route>
+          <Route path="edit-contact/:id" element={<EditContact editContactHandler={updateContactHandler} contacts={contacts} />}></Route>
+          <Route path='contact/:id' element={<ContactDetail contacts={contacts} />}></Route>
+          <Route path='*' element={<h1> page not found! </h1>}></Route>
+
+        </Routes>
       </Router>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

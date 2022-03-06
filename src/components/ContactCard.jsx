@@ -14,7 +14,12 @@ const ContactCard  = (props) => {
         </div>
         <Link to= {`delete-contact/${id}`}>
         <i className="trash alternate outline icon right floated" 
-         style ={ { color:"red",  marginTop: "10px "} }
+         style ={ { color:"red",  marginTop: "10px " , marginLeft:"10px"} }
+        ></i>
+        </Link>
+        <Link to= {`edit-contact/${id}`}>
+        <i className="edit alternate outline icon right floated" 
+         style ={ { color:"blue",  marginTop: "10px "} }
         ></i>
         </Link>
     </div>
