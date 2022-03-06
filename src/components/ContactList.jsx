@@ -22,6 +22,13 @@ return (
                 <button className="ui button blue right floated "> Add Contact</button>
             </Link>
         </h2>
+         <div className="ui container search">
+            <div className="ui icon input">
+                <input type="text" placeholder="Search contact" className="prompt " />
+                <i className="search icon"></i>
+            </div>
+        </div>
+        <br />
         {renderContactList}
     </div>
 );
