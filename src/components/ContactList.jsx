@@ -1,4 +1,4 @@
-import React from "react";
+import React ,{ useRef } from "react";
 import ContactCard from "./ContactCard";
 import { Link } from 'react-router-dom';
 
@@ -10,6 +10,14 @@ const ContactList = (props) => {
     //         email: "sahu@gmail.com",
     //     },
     // ]
+
+    const  inputEl = useRef();
+
+    const getSearchTerm = () => {
+        // console.log(inputEl.current.value);
+        props.searchKeyword(inputEl.current.value);
+    } ;
+
     const renderContactList = props.contacts.map( (contact) => {
         return (
             <ContactCard contact= {contact}  key= {contact.id}   />
@@ -24,12 +32,17 @@ return (
         </h2>
          <div className="ui container search">
             <div className="ui icon input">
-                <input type="text" placeholder="Search contact" className="prompt " />
+                <input type="text" 
+                ref={inputEl}
+                placeholder="Search contact" 
+                className="prompt "
+                onChange= {getSearchTerm} 
+                />
                 <i className="search icon"></i>
             </div>
         </div>
         <br />
-        {renderContactList}
+        {renderContactList.length >0 ? renderContactList : "No contacts available" }
     </div>
 );
 
